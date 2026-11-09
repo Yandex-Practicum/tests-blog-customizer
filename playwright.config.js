@@ -17,8 +17,13 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  // webServer: {
-  //   command: 'cd ./blog-customizer && npm run start',
-  //   url: 'http://127.0.0.1:8080',
-  // },
+  webServer: process.env.PROJECT_DIR
+    ? {
+        command: 'npm run start -- --host 127.0.0.1 --port 8080 --strictPort',
+        cwd: process.env.PROJECT_DIR,
+        url: 'http://127.0.0.1:8080',
+        timeout: 30_000,
+        reuseExistingServer: false,
+      }
+    : undefined,
 });

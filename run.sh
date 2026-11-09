@@ -1,16 +1,18 @@
 #!/bin/bash
+set -euo pipefail
+
+tests_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+project_dir="$(pwd)"
 
 echo "УСТАНОВКА ЗАВИСИМОСТЕЙ"
-npm i -g wait-port@1.0.4 > /dev/null
-npm ci > /dev/null
-npm i --prefix /tmp/tests-blog-customizer > /dev/null
-npx playwright install --with-deps > /dev/null
+# Project lock files may be incomplete; let npm repair the CI working copy.
+npm install --no-audit --no-fund
+npm ci --prefix "$tests_dir" --no-audit --no-fund
+(cd "$tests_dir" && npx --no-install playwright install --with-deps chromium)
 
 echo "СБОРКА ПРОЕКТА"
 npm run build
 
-echo "ЗАПУСК ПРОЕКТА"
-npm run start & wait-port -t 30000 localhost:8080
-
-echo "ЗАПУСК ТЕСТОВ"
-cd /tmp/tests-blog-customizer && npm run test
+echo "ЗАПУСК ПРОЕКТА И ТЕСТОВ"
+cd "$tests_dir"
+PROJECT_DIR="$project_dir" npm run test
